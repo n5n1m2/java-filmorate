@@ -117,6 +117,7 @@ public class FilmsTest {
         HttpRequest request = HttpRequest.newBuilder().uri(uri).header("Content-Type", "application/json").GET().build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         Film[] filmsList = objectMapper.readValue(response.body(), Film[].class);
+
         assertEquals(200, response.statusCode());
         assertEquals(1, filmsList.length);
         assertEquals(film, filmsList[0]);
