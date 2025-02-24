@@ -1,13 +1,11 @@
 package ru.yandex.practicum.filmorate;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
 
 import java.io.IOException;
 import java.net.URI;
@@ -21,8 +19,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 public class FilmsTest {
-    private HttpClient client = HttpClient.newBuilder().build();
-    private ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private final HttpClient client = HttpClient.newBuilder().build();
+    private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     private String json;
     private URI uri;
 
@@ -59,8 +57,7 @@ public class FilmsTest {
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         assertEquals(400, response.statusCode());
 
-        film = new Film("name", "descriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescription",
-                LocalDate.of(2023, 11, 28), 180, null);
+        film = new Film("name", "descriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescription", LocalDate.of(2023, 11, 28), 180, null);
         json = objectMapper.writeValueAsString(film);
         request = HttpRequest.newBuilder().uri(uri).header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(json)).build();
         response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -104,7 +101,7 @@ public class FilmsTest {
 
         Film film = new Film("new film name", "new description", LocalDate.of(2023, 11, 28), 180, null);
         json = objectMapper.writeValueAsString(film);
-         request = HttpRequest.newBuilder().uri(uri).header("Content-Type", "application/json").PUT(HttpRequest.BodyPublishers.ofString(json)).build();
+        request = HttpRequest.newBuilder().uri(uri).header("Content-Type", "application/json").PUT(HttpRequest.BodyPublishers.ofString(json)).build();
         response = client.send(request, HttpResponse.BodyHandlers.ofString());
         assertEquals(400, response.statusCode());
     }
