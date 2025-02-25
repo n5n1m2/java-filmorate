@@ -1,11 +1,12 @@
 package ru.yandex.practicum.filmorate;
 
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 
 import java.io.IOException;
 import java.net.URI;
@@ -18,7 +19,8 @@ import java.time.LocalDate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-public class FilmsTest {
+
+public class UsersTest {
     private final HttpClient client = HttpClient.newBuilder().build();
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     private String json;
@@ -35,11 +37,10 @@ public class FilmsTest {
     }
 
     @Test
-    public void addFilmTest() throws IOException, URISyntaxException, InterruptedException {
-        Film film = new Film("film", "description", LocalDate.of(2023, 11, 28), 180, null);
-        json = objectMapper.writeValueAsString(film);
-        uri = new URI("http://localhost:8080/films");
-
+    public void userCreateTest() throws URISyntaxException, IOException, InterruptedException {
+        User user = new User(null, "email@mail.ru", "login", "name", LocalDate.of(1980, 11, 10));
+        json = objectMapper.writeValueAsString(user);
+        uri = new URI("http://localhost:8080/users");
         HttpRequest request = HttpRequest.newBuilder().uri(uri).header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(json)).build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
@@ -48,75 +49,75 @@ public class FilmsTest {
     }
 
     @Test
-    public void addFilmFailTest() throws URISyntaxException, IOException, InterruptedException {
-        Film film = new Film("", "description", LocalDate.of(2023, 11, 28), 180, null);
-        json = objectMapper.writeValueAsString(film);
-        uri = new URI("http://localhost:8080/films");
+    public void userCreateFailTest() throws IOException, InterruptedException, URISyntaxException {
+        User user = new User(null, "email@mail.ru", "login", "name", LocalDate.of(2480, 11, 10));
+        json = objectMapper.writeValueAsString(user);
+        uri = new URI("http://localhost:8080/users");
 
         HttpRequest request = HttpRequest.newBuilder().uri(uri).header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(json)).build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
         assertEquals(400, response.statusCode());
 
-        film = new Film("name", "descriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescriptiondescription", LocalDate.of(2023, 11, 28), 180, null);
-        json = objectMapper.writeValueAsString(film);
+        user = new User(null, "ru.@mail", "login", "name", LocalDate.of(1980, 11, 10));
+        json = objectMapper.writeValueAsString(user);
+
         request = HttpRequest.newBuilder().uri(uri).header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(json)).build();
         response = client.send(request, HttpResponse.BodyHandlers.ofString());
         assertEquals(400, response.statusCode());
 
-        film = new Film("film", "description", LocalDate.of(23, 11, 28), 180, null);
-        json = objectMapper.writeValueAsString(film);
+        user = new User(null, "email@mail.ru", "login name", "name", LocalDate.of(1980, 11, 10));
+        json = objectMapper.writeValueAsString(user);
+
         request = HttpRequest.newBuilder().uri(uri).header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(json)).build();
         response = client.send(request, HttpResponse.BodyHandlers.ofString());
         assertEquals(400, response.statusCode());
-
-        film = new Film("film", "description", LocalDate.of(2023, 11, 28), -180, null);
-        json = objectMapper.writeValueAsString(film);
-        request = HttpRequest.newBuilder().uri(uri).header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(json)).build();
-        response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(400, response.statusCode());
-
     }
 
     @Test
-    public void updateFilmTest() throws IOException, URISyntaxException, InterruptedException {
-        Film film = new Film("new film name", "new description", LocalDate.of(2023, 11, 28), 180, 1);
-        json = objectMapper.writeValueAsString(film);
-        uri = new URI("http://localhost:8080/films");
+    public void createUserWithEmptyNameTest() throws IOException, URISyntaxException, InterruptedException {
+        User user = new User(null, "email@mail.ru", "login", null, LocalDate.of(1980, 11, 10));
+        json = objectMapper.writeValueAsString(user);
+        uri = new URI("http://localhost:8080/users");
 
-        HttpRequest request = HttpRequest.newBuilder().uri(uri).header("Content-Type", "application/json").PUT(HttpRequest.BodyPublishers.ofString(json)).build();
+        HttpRequest request = HttpRequest.newBuilder().uri(uri).header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(json)).build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        Film film1 = objectMapper.readValue(response.body(), Film.class);
         assertEquals(200, response.statusCode());
-        assertEquals(film, film1);
     }
 
     @Test
-    public void updateFilmFailTest() throws URISyntaxException, IOException, InterruptedException {
-        json = "";
-        uri = new URI("http://localhost:8080/films");
+    public void updateUserTest() throws IOException, InterruptedException, URISyntaxException {
+        User user = new User(1, "email@mail.ru", "newLogin", "newName", LocalDate.of(1980, 11, 10));
+        json = objectMapper.writeValueAsString(user);
+        uri = new URI("http://localhost:8080/users");
 
         HttpRequest request = HttpRequest.newBuilder().uri(uri).header("Content-Type", "application/json").PUT(HttpRequest.BodyPublishers.ofString(json)).build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(400, response.statusCode());
-
-        Film film = new Film("new film name", "new description", LocalDate.of(2023, 11, 28), 180, null);
-        json = objectMapper.writeValueAsString(film);
-        request = HttpRequest.newBuilder().uri(uri).header("Content-Type", "application/json").PUT(HttpRequest.BodyPublishers.ofString(json)).build();
-        response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        assertEquals(400, response.statusCode());
+        User user1 = objectMapper.readValue(response.body(), User.class);
+        assertEquals(200, response.statusCode());
+        assertEquals(user, user1);
     }
 
     @Test
-    public void getAllFilmsTest() throws URISyntaxException, IOException, InterruptedException {
-        Film film = new Film("new film name", "new description", LocalDate.of(2023, 11, 28), 180, 1);
-        uri = new URI("http://localhost:8080/films");
+    public void updateUserFailTest() throws IOException, InterruptedException, URISyntaxException {
+        User user = new User(97866, "email@mail.ru", "newLogin", "newName", LocalDate.of(1980, 11, 10));
+        json = objectMapper.writeValueAsString(user);
+        uri = new URI("http://localhost:8080/users");
+
+        HttpRequest request = HttpRequest.newBuilder().uri(uri).header("Content-Type", "application/json").PUT(HttpRequest.BodyPublishers.ofString(json)).build();
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        assertEquals(500, response.statusCode());
+    }
+
+    @Test
+    public void userGetAllTest() throws URISyntaxException, IOException, InterruptedException {
+        User user = new User(1, "email@mail.ru", "newLogin", "newName", LocalDate.of(1980, 11, 10));
+        uri = new URI("http://localhost:8080/users");
 
         HttpRequest request = HttpRequest.newBuilder().uri(uri).header("Content-Type", "application/json").GET().build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        Film[] filmsList = objectMapper.readValue(response.body(), Film[].class);
-
+        User[] userList = objectMapper.readValue(response.body(), User[].class);
         assertEquals(200, response.statusCode());
-        assertEquals(1, filmsList.length);
-        assertEquals(film, filmsList[0]);
+        assertEquals(1, userList.length);
+        assertEquals(user, userList[0]);
     }
 }
