@@ -43,9 +43,14 @@ public class UsersTest {
         uri = new URI("http://localhost:8080/users");
         HttpRequest request = HttpRequest.newBuilder().uri(uri).header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(json)).build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
+        User user1 = objectMapper.readValue(response.body(), User.class);
         assertEquals(200, response.statusCode());
         assertNotEquals(null, response.body());
+        assertEquals(user.getName(), user1.getName());
+        assertEquals(user.getLogin(), user1.getLogin());
+        assertEquals(user.getEmail(), user1.getEmail());
+        assertEquals(user.getBirthday(), user1.getBirthday());
+        assertNotEquals(user.getId(), user1.getId());
     }
 
     @Test

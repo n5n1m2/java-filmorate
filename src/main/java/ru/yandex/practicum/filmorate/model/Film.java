@@ -2,12 +2,15 @@ package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.Value;
 import lombok.experimental.NonFinal;
+import ru.yandex.practicum.filmorate.customAnnotatinos.ReleaseDate;
 import ru.yandex.practicum.filmorate.interfaces.Update;
 
 import java.time.LocalDate;
@@ -22,6 +25,7 @@ public class Film {
     String description;
     @JsonFormat
     @NotNull
+    @ReleaseDate
     LocalDate releaseDate;
     @NotNull
     @Min(0)
@@ -41,11 +45,5 @@ public class Film {
         this.releaseDate = releaseDate;
         this.duration = duration;
         this.id = id;
-    }
-
-    @JsonIgnore
-    @AssertTrue
-    public boolean isReleaseDateValid() {
-        return releaseDate != null && releaseDate.isAfter(LocalDate.of(1895, 12, 28));
     }
 }

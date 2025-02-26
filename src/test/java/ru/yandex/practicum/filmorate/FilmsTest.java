@@ -42,9 +42,15 @@ public class FilmsTest {
 
         HttpRequest request = HttpRequest.newBuilder().uri(uri).header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(json)).build();
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        Film film1 = objectMapper.readValue(response.body(), Film.class);
 
         assertEquals(200, response.statusCode());
         assertNotEquals(null, response.body());
+        assertEquals(film.getDescription(), film1.getDescription());
+        assertEquals(film.getDuration(), film1.getDuration());
+        assertEquals(film.getName(), film1.getName());
+        assertEquals(film.getReleaseDate(), film1.getReleaseDate());
+        assertNotEquals(film.getId(), film1.getId());
     }
 
     @Test
