@@ -37,7 +37,7 @@ public class FilmService {
         log.info("Вызван метод getMostPopularFilms");
         List<Film> filmArrayList = new ArrayList<>(filmStorage.getAllFilms());
         filmArrayList.sort(Comparator.comparingInt(film -> -film.getLikes().size()));
-        int size = (count == null || count > filmArrayList.size()) ? Math.min(filmArrayList.size(), 10) : count;
-        return filmArrayList.subList(0, size);
+        int size = (count == null) ? 10 : count;
+        return filmArrayList.subList(0, Math.min(size, filmArrayList.size()));
     }
 }
