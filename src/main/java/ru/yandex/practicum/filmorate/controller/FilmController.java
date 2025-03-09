@@ -1,62 +1,59 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.groups.Default;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.interfaces.Update;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @RestController
 @Slf4j
 @RequestMapping("/films")
+@RequiredArgsConstructor
 public class FilmController {
-    private final Map<Integer, Film> films = new HashMap<>();
+    private final FilmStorage filmStorage;
+    private final FilmService filmService;
 
     @PostMapping
     private Film addFilm(@Validated @RequestBody Film film) {
-        film.setId(getNextId());
-        log.info("Вызван метод addFilm");
-        log.debug("Получен объект " + film);
-        log.debug("Попытка добавить " + film);
-        films.put(film.getId(), film);
-        log.debug("Добавлено " + films.get(film.getId()));
-        return films.get(film.getId());
-
+        return filmStorage.addFilm(film);
     }
 
     @PutMapping
     private Film updateFilm(@Validated({Update.class, Default.class}) @RequestBody Film film) {
-        log.info("Вызван метод updateFilm");
-        log.debug("Получен объект " + film);
-        if (!films.containsKey(film.getId())) {
-            throw new ValidationException("Переданный фильм ранее не добавлялся");
-        }
-        log.debug("Попытка заменить {} на {}", films.get(film.getId()), film);
-        films.replace(film.getId(), film);
-        log.debug("В map добавлено " + films.get(film.getId()));
-        return films.get(film.getId());
+        return filmStorage.updateFilm(film);
+    }
+
+    @PutMapping("/{id}/like/{userId}")
+    private void addLike(@PathVariable int id, @PathVariable int userId) {
+        filmService.addLike(id, userId);
+    }
+
+    @DeleteMapping("/{id}/like/{userId}")
+    private void removeLike(@PathVariable int id, @PathVariable int userId) {
+        filmService.removeLike(id, userId);
+    }
+
+    @GetMapping("/popular")
+    private List<Film> getMostPopularFilms(@RequestParam(required = false) Integer count) {
+        return filmService.getMostPopularFilms(count);
     }
 
     @GetMapping
     private ArrayList<Film> getAllFilms() {
-        return new ArrayList<>(films.values());
+        return filmStorage.getAllFilms();
     }
 
-    private Integer getNextId() {
-        log.info("Вызван метод getNextId");
-        int id = films
-                .keySet()
-                .stream()
-                .mapToInt(obj -> obj)
-                .max()
-                .orElse(0) + 1;
-        log.debug("Метод вернул " + id);
-        return id;
+    @GetMapping("/{id}")
+    private Film getFilm(@PathVariable int id) {
+        return filmStorage.getFilm(id);
     }
+
 }
