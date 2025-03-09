@@ -8,12 +8,15 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import lombok.experimental.NonFinal;
 import ru.yandex.practicum.filmorate.customAnnotatinos.ReleaseDate;
 import ru.yandex.practicum.filmorate.interfaces.Update;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Data
@@ -30,6 +33,8 @@ public class Film {
     @NotNull
     @Min(0)
     Integer duration;
+    @EqualsAndHashCode.Exclude
+    Set<Integer> likes = new HashSet<>();
     @NonFinal
     @NotNull(groups = Update.class)
     Integer id;
@@ -45,5 +50,13 @@ public class Film {
         this.releaseDate = releaseDate;
         this.duration = duration;
         this.id = id;
+    }
+
+    public void addLike(User user) {
+        likes.add(user.getId());
+    }
+
+    public void removeLike(User user) {
+        likes.remove(user.getId());
     }
 }
