@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.interfaces.Update;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -17,17 +16,16 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserStorage userStorage;
     private final UserService userService;
 
     @PostMapping
     private User createUser(@Validated @RequestBody final User user) {
-        return userStorage.createUser(user);
+        return userService.createUser(user);
     }
 
     @PutMapping
     private User updateUser(@Validated({Update.class, Default.class}) @RequestBody final User user) {
-        return userStorage.updateUser(user);
+        return userService.updateUser(user);
     }
 
     @PutMapping("/{id}/friends/{friendId}")
@@ -42,12 +40,12 @@ public class UserController {
 
     @GetMapping
     private ArrayList<User> getAllUsers() {
-        return userStorage.getAllUsers();
+        return userService.getAllUsers();
     }
 
     @GetMapping("/{id}")
     private User getUser(@PathVariable int id) {
-        return userStorage.getUser(id);
+        return userService.getUser(id);
     }
 
     @GetMapping("{id}/friends")

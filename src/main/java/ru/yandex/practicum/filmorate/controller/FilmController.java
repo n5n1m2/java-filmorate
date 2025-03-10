@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.interfaces.Update;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,17 +17,16 @@ import java.util.List;
 @RequestMapping("/films")
 @RequiredArgsConstructor
 public class FilmController {
-    private final FilmStorage filmStorage;
     private final FilmService filmService;
 
     @PostMapping
     private Film addFilm(@Validated @RequestBody Film film) {
-        return filmStorage.addFilm(film);
+        return filmService.addFilm(film);
     }
 
     @PutMapping
     private Film updateFilm(@Validated({Update.class, Default.class}) @RequestBody Film film) {
-        return filmStorage.updateFilm(film);
+        return filmService.updateFilm(film);
     }
 
     @PutMapping("/{id}/like/{userId}")
@@ -48,12 +46,12 @@ public class FilmController {
 
     @GetMapping
     private ArrayList<Film> getAllFilms() {
-        return filmStorage.getAllFilms();
+        return filmService.getAllFilms();
     }
 
     @GetMapping("/{id}")
     private Film getFilm(@PathVariable int id) {
-        return filmStorage.getFilm(id);
+        return filmService.getFilm(id);
     }
 
 }

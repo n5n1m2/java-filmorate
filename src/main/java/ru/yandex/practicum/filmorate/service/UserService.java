@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
+import java.util.ArrayList;
 import java.util.Set;
 
 @Slf4j
@@ -16,7 +17,7 @@ public class UserService {
         this.userStorage = userStorage;
     }
 
-    public void addFriend(int userId, int friendId) {
+    public void addFriend(final int userId, final int friendId) {
         User user = userStorage.getUser(userId);
         User friend = userStorage.getUser(friendId);
         log.info("Вызван метод addFriend");
@@ -25,7 +26,7 @@ public class UserService {
         friend.addFriend(user);
     }
 
-    public void removeFriend(int userId, int friendId) {
+    public void removeFriend(final int userId, final int friendId) {
         log.info("Вызван метод removeFriend");
         User user = userStorage.getUser(userId);
         User friend = userStorage.getUser(friendId);
@@ -34,8 +35,24 @@ public class UserService {
         friend.removeFriend(user);
     }
 
-    public Set<User> getAllFriends(int userId) {
+    public Set<User> getAllFriends(final int userId) {
         log.info("Вызван метод getAllFriends");
         return userStorage.getUser(userId).getFriends();
+    }
+
+    public User createUser(final User user) {
+        return userStorage.createUser(user);
+    }
+
+    public User updateUser(final User user) {
+        return userStorage.updateUser(user);
+    }
+
+    public ArrayList<User> getAllUsers() {
+        return userStorage.getAllUsers();
+    }
+
+    public User getUser(final int id) {
+        return userStorage.getUser(id);
     }
 }
