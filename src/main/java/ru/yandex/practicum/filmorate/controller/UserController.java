@@ -1,72 +1,62 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.groups.Default;
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exceptions.ValidationException;
 import ru.yandex.practicum.filmorate.interfaces.Update;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Set;
 
 @RestController
-@Slf4j
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
-    private final Map<Integer, User> users = new HashMap<>();
+
+    private final UserService userService;
 
     @PostMapping
-    private User createUser(@Validated @RequestBody User user) {
-        user.setId(getNextId());
-        log.info("Вызван метод addUser");
-        log.debug("Получен объект " + user);
-
-        if (user.getName() == null) {
-            user.setName(user.getLogin());
-            log.debug("Имя заменено на  " + user.getLogin());
-        }
-        log.debug("Попытка добавить " + user);
-        users.put(user.getId(), user);
-        log.debug("Добавлено " + users.get(user.getId()));
-        return users.get(user.getId());
+    private User createUser(@Validated @RequestBody final User user) {
+        return userService.createUser(user);
     }
 
     @PutMapping
-    private User updateUser(@Validated({Update.class, Default.class}) @RequestBody User user) {
-        log.info("Вызван метод updateUser");
-        log.debug("Получен объект " + user);
-        if (!users.containsKey(user.getId())) {
-            throw new ValidationException("Переданный пользователь ранее не добавлялся");
-        }
-        if (user.getName() == null) {
-            user.setName(user.getLogin());
-            log.debug("Имя заменено на  " + user.getLogin());
-        }
-        log.debug("Попытка заменить {} на {}", users.get(user.getId()), user);
-        users.replace(user.getId(), user);
-        log.debug("В map добавлено " + users.get(user.getId()));
-        return users.get(user.getId());
+    private User updateUser(@Validated({Update.class, Default.class}) @RequestBody final User user) {
+        return userService.updateUser(user);
+    }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    private void addFriend(@PathVariable int id, @PathVariable int friendId) {
+        userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    private void removeFriend(@PathVariable int id, @PathVariable int friendId) {
+        userService.removeFriend(id, friendId);
     }
 
     @GetMapping
     private ArrayList<User> getAllUsers() {
-        log.info("Вызван метод getAllUsers");
-        log.debug("Будет возвращено  " + users);
-        return new ArrayList<>(users.values());
+        return userService.getAllUsers();
     }
 
-    private Integer getNextId() {
-        log.info("Вызван метод getNextId");
-        int id = users
-                .keySet()
-                .stream()
-                .mapToInt(obj -> obj)
-                .max()
-                .orElse(0) + 1;
-        log.debug("Метод вернул " + id);
-        return id;
+    @GetMapping("/{id}")
+    private User getUser(@PathVariable int id) {
+        return userService.getUser(id);
+    }
+
+    @GetMapping("{id}/friends")
+    private Set<User> getFriends(@PathVariable int id) {
+        return userService.getAllFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    private ArrayList<User> getCommonFriend(@PathVariable int id, @PathVariable int otherId) {
+        ArrayList<User> arrayList = new ArrayList<>(userService.getAllFriends(id));
+        arrayList.retainAll(userService.getAllFriends(otherId));
+        return arrayList;
     }
 }

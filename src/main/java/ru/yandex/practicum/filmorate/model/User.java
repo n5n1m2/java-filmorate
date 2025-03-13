@@ -2,14 +2,18 @@ package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Value;
 import lombok.experimental.NonFinal;
 import ru.yandex.practicum.filmorate.interfaces.Update;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Data
@@ -25,6 +29,9 @@ public class User {
     @Past
     @NotNull
     LocalDate birthday;
+    @JsonIgnore
+    @EqualsAndHashCode.Exclude
+    Set<User> friends = new HashSet<>();
     @NonFinal
     @NotNull(groups = Update.class)
     Integer id;
@@ -43,5 +50,13 @@ public class User {
         this.login = login;
         this.name = name;
         this.birthday = birthday;
+    }
+
+    public void addFriend(User user) {
+        friends.add(user);
+    }
+
+    public void removeFriend(User user) {
+        friends.remove(user);
     }
 }
