@@ -34,7 +34,11 @@ public class Film {
     @Min(0)
     Integer duration;
     @EqualsAndHashCode.Exclude
-    Set<Integer> likes = new HashSet<>();
+    Set<Like> likes = new HashSet<>();
+    @EqualsAndHashCode.Exclude
+    Set<FilmGenre> genres = new HashSet<>();
+    @NotNull
+    Rating rating;
     @NonFinal
     @NotNull(groups = Update.class)
     Integer id;
@@ -44,19 +48,21 @@ public class Film {
                 @JsonProperty("description") String description,
                 @JsonProperty("releaseDate") LocalDate releaseDate,
                 @JsonProperty("duration") Integer duration,
+                @JsonProperty("rating") Rating rating,
                 @JsonProperty("id") Integer id) {
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
+        this.rating = rating;
         this.id = id;
     }
 
-    public void addLike(User user) {
-        likes.add(user.getId());
+    public void addLike(Like like) {
+        likes.add(like);
     }
 
-    public void removeLike(User user) {
-        likes.remove(user.getId());
+    public void removeLike(Like like) {
+        likes.remove(like);
     }
 }
