@@ -122,9 +122,9 @@ public class UserDbStorage implements UserStorage {
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
         getUser(userId).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
         try {
-            List<Integer> friends_id = jdbcTemplate.queryForList(getAllFriends, Integer.class, userId);
+            List<Integer> friendsId = jdbcTemplate.queryForList(getAllFriends, Integer.class, userId);
             return namedParameterJdbcTemplate.query(getUsersWhereId,
-                    new MapSqlParameterSource("id", friends_id),
+                    new MapSqlParameterSource("id", friendsId),
                     new UserMapper()
             );
         } catch (EmptyResultDataAccessException e) {
