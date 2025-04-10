@@ -18,5 +18,5 @@ public interface UserStorage {
 
     void removeFriendOrDeclineRequest(User user, User friend);
 
-    List<User> getAllFriends(int user_id);
+    List<User> getAllFriends(int userId);
 }

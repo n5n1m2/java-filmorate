@@ -116,13 +116,13 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public List<User> getAllFriends(int user_id) {
+    public List<User> getAllFriends(int userId) {
         String getAllFriends = "SELECT friend_id FROM friends WHERE user_id=?";
         String getUsersWhereId = "SELECT * FROM users WHERE user_id IN (:id)";
         NamedParameterJdbcTemplate namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(jdbcTemplate);
-        getUser(user_id).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+        getUser(userId).orElseThrow(() -> new NotFoundException("Пользователь не найден"));
         try {
-            List<Integer> friends_id = jdbcTemplate.queryForList(getAllFriends, Integer.class, user_id);
+            List<Integer> friends_id = jdbcTemplate.queryForList(getAllFriends, Integer.class, userId);
             return namedParameterJdbcTemplate.query(getUsersWhereId,
                     new MapSqlParameterSource("id", friends_id),
                     new UserMapper()
