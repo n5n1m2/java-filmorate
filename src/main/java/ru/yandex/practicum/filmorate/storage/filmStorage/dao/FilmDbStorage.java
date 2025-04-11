@@ -133,7 +133,7 @@ public class FilmDbStorage implements FilmStorage {
 
 
     private void addGenre(Film film, int filmId) {
-        String sql = "INSERT INTO genre (genre_id, film_id) VALUES (?, ?)";
+        String sql = "MERGE INTO genre (genre_id, film_id) KEY (GENRE_ID, FILM_ID) VALUES (?, ?)";
         Set<Genre> genres = film.getGenres();
         if (genres == null || genres.isEmpty()) {
             return;
