@@ -10,10 +10,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.model.FriendRequest;
-import ru.yandex.practicum.filmorate.model.RequestStatus;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.mappers.RequestStatusMapper;
 import ru.yandex.practicum.filmorate.storage.mappers.UserMapper;
 import ru.yandex.practicum.filmorate.storage.userStorage.UserStorage;
 
@@ -89,30 +86,14 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public void addFriend(User user, User friend) {
-        String addFriend = "INSERT INTO friends (user_id, friend_id, request_status) VALUES (?,?,?)";
-        Optional<FriendRequest> request = getFriend(friend.getId(), user.getId());
-        if (request.isPresent()) {
-            removeFriendOrDeclineRequest(user, friend);
-            jdbcTemplate.update(addFriend, user.getId(), friend.getId(), RequestStatus.ACCEPTED.name().toLowerCase());
-            jdbcTemplate.update(addFriend, friend.getId(), user.getId(), RequestStatus.ACCEPTED.name().toLowerCase());
-        } else {
-            jdbcTemplate.update(addFriend, user.getId(), friend.getId(), RequestStatus.PENDING.name().toLowerCase());
-        }
+        String addFriend = "INSERT INTO friends (user_id, friend_id) VALUES (?,?)";
+        jdbcTemplate.update(addFriend, user.getId(), friend.getId());
     }
 
     @Override
     public void removeFriendOrDeclineRequest(User user, User friend) {
         String removeFriend = "DELETE FROM friends WHERE user_id=? AND friend_id=?";
         jdbcTemplate.update(removeFriend, user.getId(), friend.getId());
-    }
-
-    private Optional<FriendRequest> getFriend(int user_id, int friend_id) {
-        String getFriend = "SELECT * FROM friends WHERE user_id=? AND friend_id=?";
-        try {
-            return Optional.ofNullable(jdbcTemplate.queryForObject(getFriend, new RequestStatusMapper(), user_id, friend_id));
-        } catch (EmptyResultDataAccessException e) {
-            return Optional.empty();
-        }
     }
 
     @Override

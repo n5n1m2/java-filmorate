@@ -4,15 +4,12 @@ import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.filmStorage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.userStorage.UserStorage;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 @Validated
@@ -22,7 +19,6 @@ import java.util.List;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
-    private final Validator validator;
 
     public void addLike(final int filmId, final int userId) {
         log.info("Вызван метод addLike");
@@ -43,12 +39,7 @@ public class FilmService {
 
     public List<Film> getMostPopularFilms(final Integer count) {
         log.info("Вызван метод getMostPopularFilms");
-        List<Film> filmArrayList = new ArrayList<>(
-                filmStorage.getAllFilms().orElseThrow(() -> new NotFoundException("Не передан массив")));
-        filmArrayList.sort(Comparator.comparingInt(film -> -film.getLikes().size()));
-        int size = (count == null) ? 10 : count;
-        System.out.println(size + "\n\n\n\n\n");
-        return filmArrayList.subList(0, Math.min(size, filmArrayList.size()));
+        return filmStorage.getPopularFilms(count);
     }
 
     public Film addFilm(@Valid final Film film) {

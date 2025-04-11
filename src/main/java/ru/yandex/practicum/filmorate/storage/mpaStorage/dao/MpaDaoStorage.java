@@ -25,10 +25,11 @@ public class MpaDaoStorage implements MpaStorage {
 
     @Override
     public Mpa getRatingById(int id) {
-        if (id < 1 || id > 5) {
-            throw new NotFoundException("Mpa не найден");
-        }
         String getRatingById = "SELECT * FROM rating WHERE rating_id = ?";
-        return jdbcTemplate.queryForObject(getRatingById, new RatingMapper(), id);
+        try {
+            return jdbcTemplate.queryForObject(getRatingById, new RatingMapper(), id);
+        } catch (RuntimeException e) {
+            throw new NotFoundException(e.getMessage());
+        }
     }
 }

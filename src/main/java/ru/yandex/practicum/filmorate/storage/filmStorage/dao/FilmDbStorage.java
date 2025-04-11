@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.filmStorage.dao;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -9,10 +8,11 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exceptions.NotFoundException;
-import ru.yandex.practicum.filmorate.model.*;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.filmStorage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.mappers.FilmRowMapper;
-import ru.yandex.practicum.filmorate.storage.mappers.LikesMapper;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -27,19 +27,6 @@ import java.util.Set;
 @Component
 public class FilmDbStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
-
-    @PostConstruct
-    public void initRating() {
-        Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM rating", Integer.class);
-        if (count == null || count != 0) {
-            return;
-        }
-        String sql = "INSERT INTO rating (rating_name) VALUES (?)";
-        for (Rating value : Rating.values()) {
-            jdbcTemplate.update(sql, value.toString());
-        }
-    }
 
     @Override
     public Optional<Film> addFilm(Film film) {
@@ -91,7 +78,6 @@ public class FilmDbStorage implements FilmStorage {
                 film.getDuration(),
                 film.getMpa().getId(),
                 film.getId());
-        removeGenre(film);
         addGenre(film, film.getId());
         if (rowsCount > 0) {
             return getFilm(film.getId());
@@ -104,10 +90,7 @@ public class FilmDbStorage implements FilmStorage {
     public Optional<List<Film>> getAllFilms() {
         String selectAllFilms = "SELECT * FROM films AS f " +
                 "LEFT JOIN rating AS r ON f.rating_id = r.rating_id";
-        List<Film> films = new ArrayList<>();
-        for (Film film : jdbcTemplate.query(selectAllFilms, new FilmRowMapper(jdbcTemplate))) {
-            films.add(setLikes(film));
-        }
+        List<Film> films = new ArrayList<>(jdbcTemplate.query(selectAllFilms, new FilmRowMapper(jdbcTemplate)));
         return Optional.of(films);
     }
 
@@ -118,7 +101,7 @@ public class FilmDbStorage implements FilmStorage {
                 "WHERE film_id = ?";
         try {
             Film film = jdbcTemplate.queryForObject(selectFilmById, new FilmRowMapper(jdbcTemplate), id);
-            return Optional.ofNullable(setLikes(film));
+            return Optional.ofNullable(film);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
@@ -136,6 +119,18 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update(removeLike, film.getId(), user.getId());
     }
 
+    @Override
+    public List<Film> getPopularFilms(Integer count) {
+        String selectPopularFilms = "SELECT f.*, r.RATING_NAME, count(l.USER_ID) likes_count " +
+                "FROM films AS f " +
+                "JOIN likes AS l ON f.film_id = l.film_id " +
+                "LEFT JOIN rating AS r ON f.rating_id = r.rating_id " +
+                "GROUP BY f.FILM_ID, r.RATING_NAME  " +
+                "ORDER BY likes_count DESC " +
+                "LIMIT ?";
+        return jdbcTemplate.query(selectPopularFilms, new FilmRowMapper(jdbcTemplate), count == null ? 10 : count);
+    }
+
 
     private void addGenre(Film film, int filmId) {
         String sql = "INSERT INTO genre (genre_id, film_id) VALUES (?, ?)";
@@ -150,24 +145,6 @@ public class FilmDbStorage implements FilmStorage {
             });
         } catch (RuntimeException e) {
             throw new NotFoundException("Ошибка добавления рейтинга");
-        }
-    }
-
-    private void removeGenre(Film film) {
-        String removeGenre = "DELETE FROM genre WHERE film_id = ?";
-        jdbcTemplate.update(removeGenre, film.getId());
-    }
-
-    private Film setLikes(Film film) {
-        String setLike = "SELECT * FROM likes WHERE film_id = ?";
-        try {
-            List<Like> likes = jdbcTemplate.query(setLike, new LikesMapper(), film.getId());
-            for (Like like : likes) {
-                film.addLike(like);
-            }
-            return film;
-        } catch (RuntimeException e) {
-            return film;
         }
     }
 }
