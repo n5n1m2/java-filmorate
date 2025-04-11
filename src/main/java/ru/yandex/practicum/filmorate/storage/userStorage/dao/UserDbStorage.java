@@ -87,7 +87,12 @@ public class UserDbStorage implements UserStorage {
     @Override
     public void addFriend(User user, User friend) {
         String addFriend = "INSERT INTO friends (user_id, friend_id) VALUES (?,?)";
-        jdbcTemplate.update(addFriend, user.getId(), friend.getId());
+        try {
+            jdbcTemplate.update(addFriend, user.getId(), friend.getId());
+        } catch (RuntimeException e) {
+            throw new NotFoundException(e.getMessage());
+        }
+
     }
 
     @Override

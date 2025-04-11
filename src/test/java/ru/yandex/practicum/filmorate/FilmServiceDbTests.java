@@ -54,6 +54,7 @@ public class FilmServiceDbTests {
     @Test
     public void testUpdateFilm() {
         Film film = filmService.getFilm(1);
+        System.out.println(film);
         Film film2 = new Film(
                 film.getName() + " Тест изменения",
                 film.getDescription(),
