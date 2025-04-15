@@ -6,10 +6,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.interfaces.Update;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.service.user.UserService;
 
 import java.util.ArrayList;
-import java.util.Set;
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -39,7 +39,7 @@ public class UserController {
     }
 
     @GetMapping
-    private ArrayList<User> getAllUsers() {
+    private List<User> getAllUsers() {
         return userService.getAllUsers();
     }
 
@@ -49,7 +49,7 @@ public class UserController {
     }
 
     @GetMapping("{id}/friends")
-    private Set<User> getFriends(@PathVariable int id) {
+    private List<User> getFriends(@PathVariable int id) {
         return userService.getAllFriends(id);
     }
 

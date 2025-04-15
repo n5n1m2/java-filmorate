@@ -15,8 +15,7 @@ import ru.yandex.practicum.filmorate.customAnnotatinos.ReleaseDate;
 import ru.yandex.practicum.filmorate.interfaces.Update;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedHashSet;
 
 
 @Data
@@ -33,9 +32,13 @@ public class Film {
     @NotNull
     @Min(0)
     Integer duration;
-    @EqualsAndHashCode.Exclude
-    Set<Integer> likes = new HashSet<>();
     @NonFinal
+    @EqualsAndHashCode.Exclude
+    LinkedHashSet<Genre> genres;
+    @NonFinal
+    Mpa mpa;
+    @NonFinal
+    @EqualsAndHashCode.Exclude
     @NotNull(groups = Update.class)
     Integer id;
 
@@ -44,19 +47,15 @@ public class Film {
                 @JsonProperty("description") String description,
                 @JsonProperty("releaseDate") LocalDate releaseDate,
                 @JsonProperty("duration") Integer duration,
+                @JsonProperty("genres") LinkedHashSet<Genre> genres,
+                @JsonProperty("mpa") Mpa mpa,
                 @JsonProperty("id") Integer id) {
         this.name = name;
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
+        this.genres = genres;
+        this.mpa = mpa;
         this.id = id;
-    }
-
-    public void addLike(User user) {
-        likes.add(user.getId());
-    }
-
-    public void removeLike(User user) {
-        likes.remove(user.getId());
     }
 }
